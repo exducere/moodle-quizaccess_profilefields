@@ -27,6 +27,7 @@ namespace quizaccess_profilefields;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->dirroot . '/mod/quiz/accessrule/profilefields/lib.php');
 
 use moodleform;
 
@@ -54,11 +55,13 @@ class form_edit_conditions extends moodleform {
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
 
-        // Profile field selection.
+        // Campo de perfil.
+        $profilefields = \quizaccess_profilefields_get_profile_fields();
+
         $profilefields = array();
-        $fields = $DB->get_records('user_info_field', null, 'name ASC', 'id, name, shortname, datatype');
+
         foreach ($fields as $field) {
-            $profilefields[$field->id] = $field->name . ' (' . $field->shortname . ')';
+            $result[$field->id] = $field->name . ' (' . $field->shortname . ')';
         }
         $mform->addElement('select', 'fieldid', get_string('profilefield', 'quizaccess_profilefields'), $profilefields);
         $mform->addRule('fieldid', get_string('required'), 'required', null, 'client');
@@ -103,7 +106,7 @@ class form_edit_conditions extends moodleform {
             'enable_filemanagement' => false, // Deshabilitar gestión de archivos si no es necesaria
         );
         // Add the editor.
-        $mform->addElement('editor', 'message', get_string('termsconditions', 'quizaccess_termsconditions'), 'sss', $editor_options);
+        $mform->addElement('editor', 'message', get_string('custommessage', 'quizaccess_profilefields'), null, $editor_options);
         $mform->setType('message', PARAM_RAW);
 
         $this->add_action_buttons(true);
