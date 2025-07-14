@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/quiz/accessrule/profilefields/db" VERSION="20250713" COMMENT="XMLDB file for Moodle mod/quiz/accessrule/profilefields"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="quizaccess_profile_fields" COMMENT="Save profile fields conditions for quizzes">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Quiz ID"/>
+        <FIELD NAME="conditions" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID de la condición predefinida"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="quizid" TYPE="foreign" FIELDS="quizid" REFTABLE="quiz" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="quizaccess_profile_condition" COMMENT="Save profile fields conditions for quizzes">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name"/>
+        <FIELD NAME="fieldid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID profile field"/>
+        <FIELD NAME="operator" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="Conditions operators"/>
+        <FIELD NAME="value" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Value"/>
+        <FIELD NAME="message" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Custom message"/>
+        <FIELD NAME="missingaction" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="exclude" SEQUENCE="false" COMMENT="Default action"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Order"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp created"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp updated"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fieldid" TYPE="foreign" FIELDS="fieldid" REFTABLE="user_info_field" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="sortorder_name" UNIQUE="false" FIELDS="sortorder,name"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>
+
