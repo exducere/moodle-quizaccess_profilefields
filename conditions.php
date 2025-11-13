@@ -34,7 +34,7 @@ $id = required_param('id', PARAM_INT);
 
 switch ($action) {
     case 'delete':
-        $DB->delete_records('quizaccess_profile_fields', ['conditionid' => $id]);
+        $DB->delete_records('quizaccess_profile_fields', ['conditions' => $id]);
         $DB->delete_records('quizaccess_profile_condition', ['id' => $id]);
         quizaccess_profilefields_reorder_conditions();
         break;

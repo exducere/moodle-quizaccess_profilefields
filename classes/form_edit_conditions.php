@@ -27,7 +27,6 @@ namespace quizaccess_profilefields;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
-require_once($CFG->dirroot . '/mod/quiz/accessrule/profilefields/lib.php');
 
 use moodleform;
 
@@ -55,13 +54,11 @@ class form_edit_conditions extends moodleform {
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
 
-        // Campo de perfil.
-        $profilefields = \quizaccess_profilefields_get_profile_fields();
-
+        // Profile fields.
         $profilefields = array();
-
+        $fields = $DB->get_records('user_info_field', null, 'name ASC', 'id, name, shortname, datatype');
         foreach ($fields as $field) {
-            $result[$field->id] = $field->name . ' (' . $field->shortname . ')';
+            $profilefields[$field->id] = $field->name . ' (' . $field->shortname . ')';
         }
         $mform->addElement('select', 'fieldid', get_string('profilefield', 'quizaccess_profilefields'), $profilefields);
         $mform->addRule('fieldid', get_string('required'), 'required', null, 'client');
@@ -92,11 +89,11 @@ class form_edit_conditions extends moodleform {
             'exclude' => get_string('missingfield_exclude', 'quizaccess_profilefields'),
             'include' => get_string('missingfield_include', 'quizaccess_profilefields')
         ];
-        $mform->addElement('select', 'missingfield_action',
+        $mform->addElement('select', 'missingfield',
             get_string('missingfield_action', 'quizaccess_profilefields'),
             $missingaction);
-        $mform->addHelpButton('missingfield_action', 'missingfield_action', 'quizaccess_profilefields');
-        $mform->setDefault('missingfield_action', 'exclude');
+        $mform->addHelpButton('missingfield', 'missingfield_action', 'quizaccess_profilefields');
+        $mform->setDefault('missingfield', 'exclude');
 
         // Editor options.
         $editor_options = array(

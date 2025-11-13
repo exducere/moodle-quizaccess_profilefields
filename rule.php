@@ -84,33 +84,34 @@ class quizaccess_profilefields extends access_rule_base {
             // Get the user's data for this field.
             $userdata = $DB->get_record('user_info_data', array('userid' => $USER->id, 'fieldid' => $condition->fieldid));
             if(empty($userdata)) {
-                $is_block_access = $condition->missingaction;
-            }
-
-            // Get the operator and value from the condition.
-            $user_field_value = $userdata->data;
-            switch ($condition->operator) {
-                case 'contains':
-                    $is_block_access = (strpos($user_field_value, $condition->value) !== false);
-                    break;
-                case 'notcontains':
-                    $is_block_access = (strpos($user_field_value, $condition->value) === false);
-                    break;
-                case 'equals':
-                    $is_block_access = ($user_field_value == $condition->value);
-                    break;
-                case 'containsi':
-                    $is_block_access = (stripos($user_field_value, $condition->value) !== false);
-                    break;
-                case 'notcontainsi':
-                    $is_block_access = (stripos($user_field_value, $condition->value) === false);
-                    break;
-                case 'isempty':
-                    $is_block_access = empty($user_field_value);
-                    break;
-                case 'isnotempty':
-                    $is_block_access = !empty($user_field_value);
-                    break;
+                $is_block_access = ($condition->missingfield === 'include') ? false : true;
+                $user_field_value = '';
+            } else {
+                // Get the operator and value from the condition.
+                $user_field_value = $userdata->data;
+                switch ($condition->operator) {
+                    case 'contains':
+                        $is_block_access = (strpos($user_field_value, $condition->value) !== false);
+                        break;
+                    case 'notcontains':
+                        $is_block_access = (strpos($user_field_value, $condition->value) === false);
+                        break;
+                    case 'equals':
+                        $is_block_access = ($user_field_value == $condition->value);
+                        break;
+                    case 'containsi':
+                        $is_block_access = (stripos($user_field_value, $condition->value) !== false);
+                        break;
+                    case 'notcontainsi':
+                        $is_block_access = (stripos($user_field_value, $condition->value) === false);
+                        break;
+                    case 'isempty':
+                        $is_block_access = empty($user_field_value);
+                        break;
+                    case 'isnotempty':
+                        $is_block_access = !empty($user_field_value);
+                        break;
+                }
             }
 
             if($is_block_access) {
