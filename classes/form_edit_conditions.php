@@ -89,11 +89,11 @@ class form_edit_conditions extends moodleform {
             'exclude' => get_string('missingfield_exclude', 'quizaccess_profilefields'),
             'include' => get_string('missingfield_include', 'quizaccess_profilefields')
         ];
-        $mform->addElement('select', 'missingfield_action',
+        $mform->addElement('select', 'missingaction',
             get_string('missingfield_action', 'quizaccess_profilefields'),
             $missingaction);
-        $mform->addHelpButton('missingfield_action', 'missingfield_action', 'quizaccess_profilefields');
-        $mform->setDefault('missingfield_action', 'exclude');
+        $mform->addHelpButton('missingaction', 'missingfield_action', 'quizaccess_profilefields');
+        $mform->setDefault('missingaction', 'exclude');
 
         // Editor options.
         $editor_options = array(

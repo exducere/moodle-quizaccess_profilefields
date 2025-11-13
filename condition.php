@@ -53,7 +53,8 @@ if ($mform->is_cancelled()) {
         $condition->name = $data->name;
         $condition->fieldid = $data->fieldid;
         $condition->operator = $data->operator;
-        $condition->value = $data->value;
+        $condition->value = ($data->operator == 'isempty' ||  $data->operator == 'isnotempty') ? '' : $data->value;
+        $condition->missingaction = $data->missingaction;
         $condition->message = json_encode($data->message);
         $condition->timemodified = time();
         $DB->update_record('quizaccess_profile_condition', $condition);
@@ -62,7 +63,8 @@ if ($mform->is_cancelled()) {
         $condition->name = $data->name;
         $condition->fieldid = $data->fieldid;
         $condition->operator = $data->operator;
-        $condition->value = $data->value;
+        $condition->value =  ($data->operator == 'isempty' ||  $data->operator == 'isnotempty') ? '' : $data->value;
+        $condition->missingaction = $data->missingaction;
         $condition->message = json_encode($data->message);
         $condition->sortorder = $DB->get_field_sql('SELECT MAX(sortorder) + 1 FROM {quizaccess_profile_condition}');
         if (is_null($condition->sortorder)) {
