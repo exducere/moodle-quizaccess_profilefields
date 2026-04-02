@@ -19,13 +19,14 @@
  *
  * @package    quizaccess_profilefields
  * @copyright  2025 Casen Xu <casenxu@exducereonline.com>
- * @copyright  Exducere Online <@link https://exducereonline.com>
+ * @copyright  2025 Exducere Online {@link https://exducereonline.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'quizaccess_profilefields';
-$plugin->release = '4.5.7+';
-$plugin->version = 2025111202;
+$plugin->release = '4.5+';
+$plugin->version = 2026040100;
 $plugin->requires = 2023041800;
+$plugin->maturity = MATURITY_STABLE;

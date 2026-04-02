@@ -24,8 +24,6 @@
  */
 namespace quizaccess_profilefields;
 
-defined('MOODLE_INTERNAL') || die();
-
 use admin_setting_configmulticheckbox;
 
 /**
@@ -39,18 +37,6 @@ use admin_setting_configmulticheckbox;
 class admin_config_setting_profilefields_list extends admin_setting_configmulticheckbox {
 
     /**
-     * Constructor
-     * @param string $name unique ascii name
-     * @param string $visiblename localised
-     * @param string $description long localized info
-     * @param array $defaultsetting array of selected items
-     * @param array $choices array of $value=>$label for each list item
-     */
-    public function __construct($name, $visiblename, $description, $defaultsetting, $choices) {
-        parent::__construct($name, $visiblename, $description, $defaultsetting, $choices);
-    }
-
-    /**
      * Save the setting value to the database.
      *
      * @param $data
@@ -60,7 +46,7 @@ class admin_config_setting_profilefields_list extends admin_setting_configmultic
             return '';
         }
 
-        $result = array();
+        $result = [];
         foreach ($data as $key => $value) {
             if ($value) {
                 $result[] = $key;
@@ -76,7 +62,7 @@ class admin_config_setting_profilefields_list extends admin_setting_configmultic
      * @return array|null
      */
     public function get_setting() {
-        $result = array();
+        $result = [];
         $value = $this->config_read($this->name);
 
         if (is_null($value)) {
@@ -84,7 +70,7 @@ class admin_config_setting_profilefields_list extends admin_setting_configmultic
         }
 
         if ($value === '') {
-            return array();
+            return [];
         }
 
         $values = explode(',', $value);

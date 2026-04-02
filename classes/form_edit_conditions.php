@@ -40,6 +40,11 @@ use moodleform;
  */
 class form_edit_conditions extends moodleform {
 
+    /**
+     * Define the form elements
+     *
+     * @return void
+     */
     protected function definition() {
         global $DB;
 
@@ -55,7 +60,7 @@ class form_edit_conditions extends moodleform {
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
 
         // Profile fields.
-        $profilefields = array();
+        $profilefields = [];
         $fields = $DB->get_records('user_info_field', null, 'name ASC', 'id, name, shortname, datatype');
         foreach ($fields as $field) {
             $profilefields[$field->id] = $field->name . ' (' . $field->shortname . ')';
@@ -71,23 +76,23 @@ class form_edit_conditions extends moodleform {
             'containsi' => get_string('operator_containsi', 'quizaccess_profilefields'),
             'notcontainsi' => get_string('operator_notcontainsi', 'quizaccess_profilefields'),
             'isempty' => get_string('operator_isempty', 'quizaccess_profilefields'),
-            'isnotempty' => get_string('operator_isnotempty', 'quizaccess_profilefields')
+            'isnotempty' => get_string('operator_isnotempty', 'quizaccess_profilefields'),
         ];
         $mform->addElement('select', 'operator', get_string('operator', 'quizaccess_profilefields'), $operators);
         $mform->addRule('operator', get_string('required'), 'required', null, 'client');
 
-        // Value.
+        // Value field.
         $mform->addElement('text', 'value', get_string('value', 'quizaccess_profilefields'), ['size' => 50]);
         $mform->setType('value', PARAM_TEXT);
 
-        // Hacer que el campo de valor sea opcional cuando el operador es "está vacío" o "no está vacío"
+        // Make the value field optional when operator is "is empty" or "is not empty".
         $mform->disabledIf('value', 'operator', 'eq', 'isempty');
         $mform->disabledIf('value', 'operator', 'eq', 'isnotempty');
 
         // Action when the profile field is missing.
         $missingaction = [
             'exclude' => get_string('missingfield_exclude', 'quizaccess_profilefields'),
-            'include' => get_string('missingfield_include', 'quizaccess_profilefields')
+            'include' => get_string('missingfield_include', 'quizaccess_profilefields'),
         ];
         $mform->addElement('select', 'missingfield',
             get_string('missingfield_action', 'quizaccess_profilefields'),
@@ -96,14 +101,14 @@ class form_edit_conditions extends moodleform {
         $mform->setDefault('missingfield', 'exclude');
 
         // Editor options.
-        $editor_options = array(
-            'maxfiles' => 0, // Número máximo de archivos adjuntos (0 si no se necesitan archivos adjuntos)
-            'maxbytes' => 0, // Tamaño máximo de archivos adjuntos
-            'trusttext' => true, // Permitir texto de confianza para contenido sin filtro
-            'enable_filemanagement' => false, // Deshabilitar gestión de archivos si no es necesaria
-        );
+        $editoroptions = [
+            'maxfiles' => 0,
+            'maxbytes' => 0,
+            'trusttext' => true,
+            'enable_filemanagement' => false,
+        ];
         // Add the editor.
-        $mform->addElement('editor', 'message', get_string('custommessage', 'quizaccess_profilefields'), null, $editor_options);
+        $mform->addElement('editor', 'message', get_string('custommessage', 'quizaccess_profilefields'), null, $editoroptions);
         $mform->setType('message', PARAM_RAW);
 
         $this->add_action_buttons(true);

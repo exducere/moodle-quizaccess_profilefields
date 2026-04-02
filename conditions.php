@@ -83,8 +83,7 @@ redirect(new moodle_url('/admin/settings.php', ['section' => 'modsettingsquizcat
 /**
  * Corrige el orden de clasificación.
  */
-function quizaccess_profilefields_reorder_conditions()
-{
+function quizaccess_profilefields_reorder_conditions() {
     global $DB;
     $conditions = $DB->get_records('quizaccess_profile_condition', [], 'sortorder ASC, name ASC');
     $current = 1;

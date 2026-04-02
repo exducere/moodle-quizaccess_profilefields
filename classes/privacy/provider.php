@@ -19,20 +19,18 @@
  *
  * @package    quizaccess_profilefields
  * @copyright  2025 Casen Xu <casenxu@exducereonline.com>
- * @copyright  Exducere Online <@link https://exducereonline.com>
+ * @copyright  2025 Exducere Online {@link https://exducereonline.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace quizaccess_profilefields\privacy;
-
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Privacy Subsystem for quizaccess_profilefields implementing null_provider.
  *
  * @package    quizaccess_profilefields
  * @copyright  2025 Casen Xu <casenxu@exducereonline.com>
- * @copyright  Exducere Online <@link https://exducereonline.com>
+ * @copyright  2025 Exducere Online {@link https://exducereonline.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements \core_privacy\local\metadata\null_provider {
@@ -43,7 +41,7 @@ class provider implements \core_privacy\local\metadata\null_provider {
      *
      * @return  string
      */
-    public static function get_reason() : string {
+    public static function get_reason(): string {
         return 'privacy:metadata';
     }
 }

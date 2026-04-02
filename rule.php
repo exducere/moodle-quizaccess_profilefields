@@ -19,21 +19,19 @@
  *
  * @package    quizaccess_profilefields
  * @copyright  2025 Casen Xu <casenxu@exducereonline.com>
- * @copyright  Exducere Online <@link https://exducereonline.com>
+ * @copyright  2025 Exducere Online {@link https://exducereonline.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
 
 use mod_quiz\local\access_rule_base;
 use mod_quiz\quiz_settings;
 
 /**
- *  Class that implements the access rule based on profile fields.
+ * Class that implements the access rule based on profile fields.
  *
  * @package    quizaccess_profilefields
  * @copyright  2025 Casen Xu <casenxu@exducereonline.com>
- * @copyright  Exducere Online <@link https://exducereonline.com>
+ * @copyright  2025 Exducere Online {@link https://exducereonline.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class quizaccess_profilefields extends access_rule_base {
@@ -44,12 +42,12 @@ class quizaccess_profilefields extends access_rule_base {
      *
      * @param quiz_settings $quizobj information about the quiz in question.
      * @param int $timenow the time that should be considered as 'now'.
-     * @param bool $canignoretimelimits whether the current user is exempt from
+     * @param bool $canignoretimelimits whether the current user is exempt from time limits.
      *
      * @return self|null the rule, if applicable, else null.
      */
     public static function make($quizobj, $timenow, $canignoretimelimits) {
-        if (!empty($quizobj->get_quiz()->profilefieldslistconditionsarray) AND
+        if (!empty($quizobj->get_quiz()->profilefieldslistconditionsarray) &&
             $quizobj->get_quiz()->enable_quizaccess_profilefields) {
             return new self($quizobj, $timenow);
         } else {
@@ -60,7 +58,8 @@ class quizaccess_profilefields extends access_rule_base {
     /**
      * Whether the user should be blocked from starting a new attempt or continuing
      * an attempt now.
-     * @return string false if access should be allowed, a message explaining the
+     *
+     * @return string|false false if access should be allowed, a message explaining the
      *      reason if access should be prevented.
      */
     public function prevent_access() {
@@ -73,77 +72,88 @@ class quizaccess_profilefields extends access_rule_base {
 
         // Verify if there are conditions configured.
         foreach ($conditions as $condition) {
-            $is_block_access = false;
+            $isblockaccess = false;
 
             // Get the field data.
-            $field = $DB->get_record('user_info_field', array('id' => $condition->fieldid), '*', MUST_EXIST);
-            if(empty($field)) {
+            $field = $DB->get_record('user_info_field', ['id' => $condition->fieldid]);
+            if (empty($field)) {
                 continue;
             }
 
             // Get the user's data for this field.
-            $userdata = $DB->get_record('user_info_data', array('userid' => $USER->id, 'fieldid' => $condition->fieldid));
-            if(empty($userdata)) {
-                $is_block_access = ($condition->missingfield === 'include') ? false : true;
-                $user_field_value = '';
+            $userdata = $DB->get_record('user_info_data', ['userid' => $USER->id, 'fieldid' => $condition->fieldid]);
+            if (empty($userdata)) {
+                $isblockaccess = ($condition->missingfield === 'include') ? false : true;
+                $userfieldvalue = '';
             } else {
                 // Get the operator and value from the condition.
-                $user_field_value = $userdata->data;
+                $userfieldvalue = $userdata->data;
                 switch ($condition->operator) {
                     case 'contains':
-                        $is_block_access = (strpos($user_field_value, $condition->value) !== false);
+                        $isblockaccess = (strpos($userfieldvalue, $condition->value) !== false);
                         break;
                     case 'notcontains':
-                        $is_block_access = (strpos($user_field_value, $condition->value) === false);
+                        $isblockaccess = (strpos($userfieldvalue, $condition->value) === false);
                         break;
                     case 'equals':
-                        $is_block_access = ($user_field_value == $condition->value);
+                        $isblockaccess = ($userfieldvalue == $condition->value);
                         break;
                     case 'containsi':
-                        $is_block_access = (stripos($user_field_value, $condition->value) !== false);
+                        $isblockaccess = (stripos($userfieldvalue, $condition->value) !== false);
                         break;
                     case 'notcontainsi':
-                        $is_block_access = (stripos($user_field_value, $condition->value) === false);
+                        $isblockaccess = (stripos($userfieldvalue, $condition->value) === false);
                         break;
                     case 'isempty':
-                        $is_block_access = empty($user_field_value);
+                        $isblockaccess = empty($userfieldvalue);
                         break;
                     case 'isnotempty':
-                        $is_block_access = !empty($user_field_value);
+                        $isblockaccess = !empty($userfieldvalue);
                         break;
                 }
             }
 
-            if($is_block_access) {
-                $profilefields_block_icon = html_writer::tag('i', '', ['class' => 'fa fa-user-check']);
-                $profilefields_block_text = !empty($condition->message) ? $condition->message : '';
+            if ($isblockaccess) {
+                $blockicon = html_writer::tag('i', '', ['class' => 'fa fa-user-check']);
+                $blocktext = !empty($condition->message) ? $condition->message : '';
 
                 // Format the custom message to be displayed when access is blocked.
-                if (empty($profilefields_block_text) || empty(json_decode($condition->message)->text)) {
-                    $profilefields_block_text = get_string('default_block_text', 'quizaccess_profilefields');
+                if (empty($blocktext) || empty(json_decode($condition->message)->text)) {
+                    $blocktext = get_string('default_block_text', 'quizaccess_profilefields');
                 } else {
-                    $profilefields_block_text = json_decode($condition->message)->text;
+                    $blocktext = json_decode($condition->message)->text;
                 }
 
                 // Set the custom information adding to the message to be displayed.
                 $items = [];
                 $course = $DB->get_record('course', ['id' => $this->quiz->course]);
-                $items[] = html_writer::tag('strong', get_string('user').": ").
-                    "(".$USER->username.") ".$USER->firstname." ".$USER->lastname." - ".$USER->email;
-                $items[] = html_writer::tag('strong', get_string('quizname', 'quiz_statistics').": "). $this->quiz->name;
-                $items[] = html_writer::tag('strong', get_string('coursename', 'quiz_statistics').": "). $course->fullname;
-                $items[] = html_writer::tag('strong', get_string('condition', 'quizaccess_profilefields').": "). $condition->name;
-                $items[] = html_writer::tag('strong', get_string('value', 'quizaccess_profilefields').": "). $user_field_value;
-                $items[] = html_writer::tag('strong',get_string('date').": ").userdate(time(), '%d %B %Y, %I:%M:%S %p');
+                $items[] = html_writer::tag('strong', get_string('user') . ": ") .
+                    "(" . $USER->username . ") " . $USER->firstname . " " . $USER->lastname .
+                    " - " . $USER->email;
+                $items[] = html_writer::tag('strong', get_string('quizname', 'quiz_statistics') . ": ") .
+                    $this->quiz->name;
+                $items[] = html_writer::tag('strong', get_string('coursename', 'quiz_statistics') . ": ") .
+                    $course->fullname;
+                $items[] = html_writer::tag('strong', get_string('condition', 'quizaccess_profilefields') . ": ") .
+                    $condition->name;
+                $items[] = html_writer::tag('strong', get_string('value', 'quizaccess_profilefields') . ": ") .
+                    $userfieldvalue;
+                $items[] = html_writer::tag('strong', get_string('date') . ": ") .
+                    userdate(time(), '%d %B %Y, %I:%M:%S %p');
 
-                $content_info_text = html_writer::tag('div',"<span>$profilefields_block_icon</span> <span>$profilefields_block_text</span>", ['class' => 'flex flex-row']);
-                $content_log_info = html_writer::tag('div',
-                    html_writer::alist($items, [],'ul'),
+                $infotext = html_writer::tag(
+                    'div',
+                    "<span>$blockicon</span> <span>$blocktext</span>",
+                    ['class' => 'flex flex-row']
+                );
+                $loginfo = html_writer::tag(
+                    'div',
+                    html_writer::alist($items, [], 'ul'),
                     ['class' => 'flex flex-row']
                 );
 
                 $message = html_writer::tag('div',
-                    $content_info_text . $content_log_info,
+                    $infotext . $loginfo,
                     ['class' => 'alert alert-danger text-left']
                 );
 
@@ -163,11 +173,10 @@ class quizaccess_profilefields extends access_rule_base {
      *         (maybe '' if no message is appropriate).
      */
     public function description() {
-        // Check if the plugin is enabled.
-        $profilefields_info_icon = html_writer::tag('i', '', ['class' => 'fa fa-user-check']);
-        $profilefields_info_text = get_string('profilefields_quiz_info', 'quizaccess_profilefields');
+        $infoicon = html_writer::tag('i', '', ['class' => 'fa fa-user-check']);
+        $infotext = get_string('profilefields_quiz_info', 'quizaccess_profilefields');
         $messages[] = html_writer::tag('div',
-            "<span>$profilefields_info_icon</span> <span>$profilefields_info_text</span>",
+            "<span>$infoicon</span> <span>$infotext</span>",
             ['class' => 'alert alert-info text-left']
         );
         return $messages;
@@ -177,6 +186,7 @@ class quizaccess_profilefields extends access_rule_base {
      * Add any fields that this rule requires to the quiz settings form. This
      * method is called from {@see mod_quiz_mod_form::definition()}, while the
      * security section is being built.
+     *
      * @param mod_quiz_mod_form $quizform the quiz settings form that is being built.
      * @param MoodleQuickForm $mform the wrapped MoodleQuickForm.
      */
@@ -212,6 +222,7 @@ class quizaccess_profilefields extends access_rule_base {
     /**
      * Save any submitted settings when the quiz settings form is submitted. This
      * is called from {@see quiz_after_add_or_update()} in lib.php.
+     *
      * @param object $quiz the data from the quiz form, including $quiz->id
      *      which is the id of the quiz being saved.
      */
@@ -231,7 +242,7 @@ class quizaccess_profilefields extends access_rule_base {
 
     /**
      * Delete any rule-specific settings when the quiz is deleted. This is called
-     *  from {@see quiz_delete_instance()} in lib.php.
+     * from {@see quiz_delete_instance()} in lib.php.
      *
      * @param object $quiz the data from the database, including $quiz->id
      *       which is the id of the quiz being deleted.
@@ -245,6 +256,7 @@ class quizaccess_profilefields extends access_rule_base {
     /**
      * You can use this method to load any extra settings your plugin has that
      * cannot be loaded efficiently with get_settings_sql().
+     *
      * @param int $quizid the quiz id.
      * @return array setting value name => value. The value names should all
      *      start with the name of your plugin to avoid collisions.
@@ -253,19 +265,18 @@ class quizaccess_profilefields extends access_rule_base {
         global $DB;
 
         $conditions = [];
-        $all_conditions = $DB->get_records('quizaccess_profile_condition');
-        $used_conditions = $DB->get_records_menu('quizaccess_profile_fields', ['quizid' => $quizid], '', 'id, conditions');
-        foreach ($all_conditions as $condition_id => $condition) {
-            if (in_array($condition_id, $used_conditions)) {
-                $conditions["profilefieldslistconditions[$condition_id]"] = 1;
+        $allconditions = $DB->get_records('quizaccess_profile_condition');
+        $usedconditions = $DB->get_records_menu('quizaccess_profile_fields', ['quizid' => $quizid], '', 'id, conditions');
+        foreach ($allconditions as $conditionid => $condition) {
+            if (in_array($conditionid, $usedconditions)) {
+                $conditions["profilefieldslistconditions[$conditionid]"] = 1;
             } else {
-                $conditions["profilefieldslistconditions[$condition_id]"] = 0;
+                $conditions["profilefieldslistconditions[$conditionid]"] = 0;
             }
         }
-        $conditions['profilefieldslistconditionsarray'] = $used_conditions;
+        $conditions['profilefieldslistconditionsarray'] = $usedconditions;
         $conditions['enable_quizaccess_profilefields'] = get_config('quizaccess_profilefields', 'enable_quizaccess_profilefields');
         return $conditions;
     }
 
 }
-

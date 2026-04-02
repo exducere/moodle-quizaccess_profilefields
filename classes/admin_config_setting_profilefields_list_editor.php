@@ -55,7 +55,7 @@ class admin_config_setting_profilefields_list_editor extends admin_setting {
     }
 
     /**
-     * Siempre devuelve true, no hace nada.
+     * Always returns true, does nothing.
      *
      * @return true
      */
@@ -64,7 +64,7 @@ class admin_config_setting_profilefields_list_editor extends admin_setting {
     }
 
     /**
-     * Siempre devuelve true, no hace nada.
+     * Always returns true, does nothing.
      *
      * @return true
      */
@@ -73,21 +73,21 @@ class admin_config_setting_profilefields_list_editor extends admin_setting {
     }
 
     /**
-     * Siempre devuelve '', no escribe nada.
+     * Always returns empty string, does not save anything.
      *
-     * @param mixed $data ignorado
-     * @return string Siempre devuelve ''
+     * @param mixed $data Ignored.
+     * @return string Always returns empty string.
      */
     public function write_setting($data) {
         return '';
     }
 
     /**
-     * Genera html con enlaces de acción.
+     * Generate html with action links.
      *
-     * @param \stdClass $condition
-     * @param int $current
-     * @param int $count
+     * @param \stdClass $condition The condition record.
+     * @param int $current The current position.
+     * @param int $count The total number of conditions.
      * @return string
      */
     private function actions_list($condition, $current, $count) {
@@ -124,14 +124,13 @@ class admin_config_setting_profilefields_list_editor extends admin_setting {
     }
 
     /**
-     * Construye el XHTML para mostrar el control.
+     * Build the XHTML to display the control.
      *
-     * @param string $data No usado
-     * @param string $query
+     * @param string $data Not used.
+     * @param string $query The search query.
      * @return string
      */
-    public function output_html($data, $query = '')
-    {
+    public function output_html($data, $query = '') {
         global $OUTPUT, $DB;
 
         $table = new html_table();
@@ -140,7 +139,7 @@ class admin_config_setting_profilefields_list_editor extends admin_setting {
             get_string('profilefield', 'quizaccess_profilefields'),
             get_string('operator', 'quizaccess_profilefields'),
             get_string('value', 'quizaccess_profilefields'),
-            ''
+            '',
         ];
         $table->colclasses = ['leftalign', 'leftalign', 'leftalign', 'leftalign', 'centeralign'];
         $table->id = 'quizaccess_profilefields';
@@ -158,15 +157,15 @@ class admin_config_setting_profilefields_list_editor extends admin_setting {
             'containsi' => get_string('operator_containsi', 'quizaccess_profilefields'),
             'notcontainsi' => get_string('operator_notcontainsi', 'quizaccess_profilefields'),
             'isempty' => get_string('operator_isempty', 'quizaccess_profilefields'),
-            'isnotempty' => get_string('operator_isnotempty', 'quizaccess_profilefields')
+            'isnotempty' => get_string('operator_isnotempty', 'quizaccess_profilefields'),
         ];
 
         foreach ($conditions as $condition) {
-            // Obtener información del campo de perfil.
+            // Get the profile field information.
             $field = $DB->get_record('user_info_field', ['id' => $condition->fieldid]);
             $fieldname = $field ? $field->name : get_string('unknownfield', 'quizaccess_profilefields');
 
-            // Obtener el nombre del operador
+            // Get the operator name.
             $operatorname = isset($operators[$condition->operator]) ?
                 $operators[$condition->operator] : $condition->operator;
 
@@ -175,7 +174,7 @@ class admin_config_setting_profilefields_list_editor extends admin_setting {
                 $fieldname,
                 $operatorname,
                 $condition->value,
-                $this->actions_list($condition, $current, $count)
+                $this->actions_list($condition, $current, $count),
             ];
             $current++;
         }
