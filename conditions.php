@@ -34,63 +34,68 @@ $id = required_param('id', PARAM_INT);
 
 switch ($action) {
     case 'delete':
-        $DB->delete_records('quizaccess_profile_fields', ['conditions' => $id]);
-        $DB->delete_records('quizaccess_profile_condition', ['id' => $id]);
+        $DB->delete_records('quizaccess_profilefields_quizzes', ['conditions' => $id]);
+        $DB->delete_records('quizaccess_profilefields_conditions', ['id' => $id]);
         quizaccess_profilefields_reorder_conditions();
         break;
 
     case 'up':
-        $conditions = $DB->get_records('quizaccess_profile_condition', [], 'sortorder ASC, name ASC');
-        $previous = null;
-        foreach ($conditions as $condition) {
-            if ($condition->id == $id) {
-                if ($previous) {
-                    $temp = $condition->sortorder;
-                    $condition->sortorder = $previous->sortorder;
-                    $previous->sortorder = $temp;
-                    $DB->update_record('quizaccess_profile_condition', $condition);
-                    $DB->update_record('quizaccess_profile_condition', $previous);
-                    quizaccess_profilefields_reorder_conditions();
-                    break;
-                }
-            }
-            $previous = $condition;
-        }
-        break;
-
     case 'down':
-        $conditions = $DB->get_records('quizaccess_profile_condition', [], 'sortorder DESC, name DESC');
-        $previous = null;
-        foreach ($conditions as $condition) {
-            if ($condition->id == $id) {
-                if ($previous) {
-                    $temp = $condition->sortorder;
-                    $condition->sortorder = $previous->sortorder;
-                    $previous->sortorder = $temp;
-                    $DB->update_record('quizaccess_profile_condition', $condition);
-                    $DB->update_record('quizaccess_profile_condition', $previous);
-                    quizaccess_profilefields_reorder_conditions();
-                    break;
-                }
-            }
-            $previous = $condition;
-        }
+        quizaccess_profilefields_swap_condition($id, $action);
         break;
 }
 
 redirect(new moodle_url('/admin/settings.php', ['section' => 'modsettingsquizcatprofilefields']));
 
 /**
+ * Move a condition one position up or down by swapping its sortorder with its neighbour.
+ *
+ * All records are loaded once and the target/neighbour are located in memory; the two
+ * update_record() calls run outside any loop to avoid per-iteration database writes.
+ *
+ * @param int $id the id of the condition to move.
+ * @param string $direction either 'up' or 'down'.
+ */
+function quizaccess_profilefields_swap_condition($id, $direction) {
+    global $DB;
+
+    // Ordering the list in the direction of travel means the neighbour to swap with
+    // is always the item immediately before the target in this in-memory array.
+    $order = ($direction === 'up') ? 'sortorder ASC, name ASC' : 'sortorder DESC, name DESC';
+    $conditions = array_values($DB->get_records('quizaccess_profilefields_conditions', [], $order));
+
+    $target = null;
+    $neighbour = null;
+    foreach ($conditions as $index => $condition) {
+        if ($condition->id == $id) {
+            $target = $condition;
+            $neighbour = $index > 0 ? $conditions[$index - 1] : null;
+            break;
+        }
+    }
+
+    // Nothing to do if the condition was not found or it is already at the edge.
+    if ($target === null || $neighbour === null) {
+        return;
+    }
+
+    [$target->sortorder, $neighbour->sortorder] = [$neighbour->sortorder, $target->sortorder];
+    $DB->update_record('quizaccess_profilefields_conditions', $target);
+    $DB->update_record('quizaccess_profilefields_conditions', $neighbour);
+    quizaccess_profilefields_reorder_conditions();
+}
+
+/**
  * Corrige el orden de clasificación.
  */
 function quizaccess_profilefields_reorder_conditions() {
     global $DB;
-    $conditions = $DB->get_records('quizaccess_profile_condition', [], 'sortorder ASC, name ASC');
+    $conditions = $DB->get_records('quizaccess_profilefields_conditions', [], 'sortorder ASC, name ASC');
     $current = 1;
     foreach ($conditions as $condition) {
         if ($condition->sortorder != $current) {
             $condition->sortorder = $current;
-            $DB->update_record('quizaccess_profile_condition', $condition);
+            $DB->update_record('quizaccess_profilefields_conditions', $condition);
         }
         $current++;
     }

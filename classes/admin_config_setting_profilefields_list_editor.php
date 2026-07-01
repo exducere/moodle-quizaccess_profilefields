@@ -146,9 +146,17 @@ class admin_config_setting_profilefields_list_editor extends admin_setting {
         $table->attributes['class'] = 'admintable generaltable';
         $table->data = [];
 
-        $conditions = $DB->get_records('quizaccess_profile_condition', [], 'sortorder ASC');
+        $conditions = $DB->get_records('quizaccess_profilefields_conditions', [], 'sortorder ASC');
         $current = 1;
         $count = count($conditions);
+
+        // Preload all user_info_field records in bulk to avoid N+1 queries in the loop.
+        $fields = [];
+        if (!empty($conditions)) {
+            $fieldids = array_unique(array_column((array) $conditions, 'fieldid'));
+            list($fieldinsql, $fieldparams) = $DB->get_in_or_equal($fieldids);
+            $fields = $DB->get_records_select('user_info_field', 'id ' . $fieldinsql, $fieldparams);
+        }
 
         $operators = [
             'contains' => get_string('operator_contains', 'quizaccess_profilefields'),
@@ -161,9 +169,9 @@ class admin_config_setting_profilefields_list_editor extends admin_setting {
         ];
 
         foreach ($conditions as $condition) {
-            // Get the profile field information.
-            $field = $DB->get_record('user_info_field', ['id' => $condition->fieldid]);
-            $fieldname = $field ? $field->name : get_string('unknownfield', 'quizaccess_profilefields');
+            $fieldname = isset($fields[$condition->fieldid]) ?
+                $fields[$condition->fieldid]->name :
+                get_string('unknownfield', 'quizaccess_profilefields');
 
             // Get the operator name.
             $operatorname = isset($operators[$condition->operator]) ?

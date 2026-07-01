@@ -40,7 +40,7 @@ $PAGE->set_heading($COURSE->fullname);
 $formurl = new moodle_url('/mod/quiz/accessrule/profilefields/condition.php');
 $mform = new \quizaccess_profilefields\form_edit_conditions($formurl);
 if ($id) {
-    $condition = $DB->get_record('quizaccess_profile_condition', ['id' => $id]);
+    $condition = $DB->get_record('quizaccess_profilefields_conditions', ['id' => $id]);
     $condition->message = json_decode($condition->message, true);
     $mform->set_data($condition);
 }
@@ -57,7 +57,7 @@ if ($mform->is_cancelled()) {
         $condition->missingfield = $data->missingfield;
         $condition->message = json_encode($data->message);
         $condition->timemodified = time();
-        $DB->update_record('quizaccess_profile_condition', $condition);
+        $DB->update_record('quizaccess_profilefields_conditions', $condition);
     } else {
         $condition = new stdClass();
         $condition->name = $data->name;
@@ -66,13 +66,13 @@ if ($mform->is_cancelled()) {
         $condition->value = ($data->operator === 'isempty' ||  $data->operator === 'isnotempty') ? '' : $data->value;
         $condition->missingfield = $data->missingfield;
         $condition->message = json_encode($data->message);
-        $condition->sortorder = $DB->get_field_sql('SELECT MAX(sortorder) + 1 FROM {quizaccess_profile_condition}');
+        $condition->sortorder = $DB->get_field_sql('SELECT MAX(sortorder) + 1 FROM {quizaccess_profilefields_conditions}');
         if (is_null($condition->sortorder)) {
             $condition->sortorder = 1;
         }
         $condition->timecreated = time();
         $condition->timemodified = time();
-        $DB->insert_record('quizaccess_profile_condition', $condition);
+        $DB->insert_record('quizaccess_profilefields_conditions', $condition);
     }
     redirect($pageurl);
 }

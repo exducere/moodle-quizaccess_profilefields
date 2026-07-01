@@ -45,7 +45,7 @@ if ($ADMIN->fulltree && $hassiteconfig) {
     ));
 
     // Default conditions to apply to new quizzes.
-    $choices = $DB->get_records_menu('quizaccess_profile_condition', [], 'sortorder ASC, name ASC', 'id, name');
+    $choices = $DB->get_records_menu('quizaccess_profilefields_conditions', [], 'sortorder ASC, name ASC', 'id, name');
     if (!empty($choices)) {
         $defaultsetting = ['value' => [], 'adv' => true];
         $settings->add(new admin_config_setting_profilefields_list('quizaccess_profilefields/defaultconditions',

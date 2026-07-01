@@ -68,26 +68,41 @@ class quizaccess_profilefields extends access_rule_base {
         // Get conditions from the database.
         list($inorequal, $params) = $DB->get_in_or_equal($this->quiz->profilefieldslistconditionsarray);
         $select = 'id ' . $inorequal;
-        $conditions = $DB->get_records_select('quizaccess_profile_condition', $select, $params, 'sortorder ASC, name ASC');
+        $conditions = $DB->get_records_select('quizaccess_profilefields_conditions', $select, $params, 'sortorder ASC, name ASC');
+
+        if (empty($conditions)) {
+            return false;
+        }
+
+        // Preload all required user_info_field records in bulk.
+        $fieldids = array_unique(array_column((array) $conditions, 'fieldid'));
+        list($fieldinsql, $fieldparams) = $DB->get_in_or_equal($fieldids);
+        $fields = $DB->get_records_select('user_info_field', 'id ' . $fieldinsql, $fieldparams);
+
+        // Preload all user_info_data records for this user in bulk, keyed by fieldid.
+        list($datainsql, $dataparams) = $DB->get_in_or_equal($fieldids);
+        $userdatarecords = $DB->get_records_sql(
+            'SELECT fieldid, data FROM {user_info_data} WHERE userid = ? AND fieldid ' . $datainsql,
+            array_merge([$USER->id], $dataparams)
+        );
+
+        // Load the course record once, outside the loop.
+        $course = $DB->get_record('course', ['id' => $this->quiz->course]);
 
         // Verify if there are conditions configured.
         foreach ($conditions as $condition) {
             $isblockaccess = false;
 
-            // Get the field data.
-            $field = $DB->get_record('user_info_field', ['id' => $condition->fieldid]);
-            if (empty($field)) {
+            if (!isset($fields[$condition->fieldid])) {
                 continue;
             }
 
-            // Get the user's data for this field.
-            $userdata = $DB->get_record('user_info_data', ['userid' => $USER->id, 'fieldid' => $condition->fieldid]);
-            if (empty($userdata)) {
+            if (!isset($userdatarecords[$condition->fieldid])) {
                 $isblockaccess = ($condition->missingfield === 'include') ? false : true;
                 $userfieldvalue = '';
             } else {
                 // Get the operator and value from the condition.
-                $userfieldvalue = $userdata->data;
+                $userfieldvalue = $userdatarecords[$condition->fieldid]->data;
                 switch ($condition->operator) {
                     case 'contains':
                         $isblockaccess = (strpos($userfieldvalue, $condition->value) !== false);
@@ -126,7 +141,6 @@ class quizaccess_profilefields extends access_rule_base {
 
                 // Set the custom information adding to the message to be displayed.
                 $items = [];
-                $course = $DB->get_record('course', ['id' => $this->quiz->course]);
                 $items[] = html_writer::tag('strong', get_string('user') . ": ") .
                     "(" . $USER->username . ") " . $USER->firstname . " " . $USER->lastname .
                     " - " . $USER->email;
@@ -196,7 +210,7 @@ class quizaccess_profilefields extends access_rule_base {
 
         $pluginconfig = get_config('quizaccess_profilefields');
 
-        $conditions = $DB->get_records_menu('quizaccess_profile_condition', [], 'sortorder ASC, name ASC', 'id, name');
+        $conditions = $DB->get_records_menu('quizaccess_profilefields_conditions', [], 'sortorder ASC, name ASC', 'id, name');
         if (empty($conditions) || !$pluginconfig->enable_quizaccess_profilefields) {
             return;
         }
@@ -229,13 +243,13 @@ class quizaccess_profilefields extends access_rule_base {
     public static function save_settings($quiz) {
         global $DB;
 
-        $DB->delete_records('quizaccess_profile_fields', ['quizid' => $quiz->id]);
+        $DB->delete_records('quizaccess_profilefields_quizzes', ['quizid' => $quiz->id]);
         if (!empty($quiz->profilefieldslistconditions)) {
             foreach ($quiz->profilefieldslistconditions as $conditionids => $unused) {
                 $record = new stdClass();
                 $record->quizid = $quiz->id;
                 $record->conditions = $conditionids;
-                $DB->insert_record('quizaccess_profile_fields', $record);
+                $DB->insert_record('quizaccess_profilefields_quizzes', $record);
             }
         }
     }
@@ -250,7 +264,7 @@ class quizaccess_profilefields extends access_rule_base {
     public static function delete_settings($quiz) {
         global $DB;
 
-        $DB->delete_records('quizaccess_profile_fields', ['quizid' => $quiz->id]);
+        $DB->delete_records('quizaccess_profilefields_quizzes', ['quizid' => $quiz->id]);
     }
 
     /**
@@ -265,8 +279,8 @@ class quizaccess_profilefields extends access_rule_base {
         global $DB;
 
         $conditions = [];
-        $allconditions = $DB->get_records('quizaccess_profile_condition');
-        $usedconditions = $DB->get_records_menu('quizaccess_profile_fields', ['quizid' => $quizid], '', 'id, conditions');
+        $allconditions = $DB->get_records('quizaccess_profilefields_conditions');
+        $usedconditions = $DB->get_records_menu('quizaccess_profilefields_quizzes', ['quizid' => $quizid], '', 'id, conditions');
         foreach ($allconditions as $conditionid => $condition) {
             if (in_array($conditionid, $usedconditions)) {
                 $conditions["profilefieldslistconditions[$conditionid]"] = 1;

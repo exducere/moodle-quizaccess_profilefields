@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/quiz/accessrule/profilefields/db" VERSION="20251112" COMMENT="XMLDB file for Moodle mod/quiz/accessrule/profilefields"
+<XMLDB PATH="mod/quiz/accessrule/profilefields/db" VERSION="20260701" COMMENT="XMLDB file for Moodle mod/quiz/accessrule/profilefields"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="quizaccess_profile_fields" COMMENT="Save profile fields conditions for quizzes">
+    <TABLE NAME="quizaccess_profilefields_quizzes" COMMENT="Maps predefined profile field conditions to the quizzes that use them">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Quiz ID"/>
@@ -15,7 +15,7 @@
         <KEY NAME="quizid" TYPE="foreign" FIELDS="quizid" REFTABLE="quiz" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="quizaccess_profile_condition" COMMENT="Save profile fields conditions for quizzes">
+    <TABLE NAME="quizaccess_profilefields_conditions" COMMENT="Reusable profile field conditions defined at site level">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name"/>
