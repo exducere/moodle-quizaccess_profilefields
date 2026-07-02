@@ -27,6 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'quizaccess_profilefields';
 $plugin->release = '4.5+';
-$plugin->version = 2026070100;
+$plugin->version = 2026070101;
 $plugin->requires = 2023041800;
 $plugin->maturity = MATURITY_STABLE;
